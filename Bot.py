@@ -6,7 +6,8 @@ import discord
 import os
 
 import ConfigParser as configparser
-dDISCORD_TOKEN = configparser.get_discord_api_key()
+DISCORD_TOKEN = configparser.get_discord_api_key()
+print(DISCORD_TOKEN)
 OPENAI_TOKEN = configparser.get_openai_api_key()
 openai.api_key = OPENAI_TOKEN
 
@@ -17,37 +18,15 @@ MAX_TOKENS = configparser.get_max_tokens()
 
 client = discord.Client()
 
-user_arr = []
-class User:
-    global Name
-    def __init__(self,UserID,Name,Pronouns,ADMIN_PRIV):
-        self.UserID = UserID
-        self.Name = Name
-        self.Pronouns = Pronouns
-        if ADMIN_PRIV == 'ADMIN':
-            self.ADMIN_PRIV = True
-        else:
-            self.ADMIN_PRIV = False
 
-    def getName():
-        return Name
-class UserManager:
-    def __init__(self,filename):
-       f = open(filename, "a")
-       import csv
-       with open("UserMappings.csv") as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            line_count = 0
-            for row in csv_reader:
-                user_arr.append(User(row[0],row[1],row[2],row[3]))
+from User_Object_Array_Generator import UserObjectArrayGenerator
+FormattedStringUsers = configparser.get_user_mappings()
+user_array_generator = UserObjectArrayGenerator()
+user_array = user_array_generator.convertFormatedArraytoUserArray(FormattedStringUsers)
 
-    def GetUser(self,UserID):
-        for user in user_arr:
-            if user.UserID == UserID:
-                return user
-        print("User not found")
+from User_Searcher import UserSearcher
+user_searcher = UserSearcher()
 
-usermanager = UserManager("UserMappings.csv")
 
 prompt_arr = []
     
@@ -60,7 +39,7 @@ def getResponce(prompt, userID):
     top_p=1,
     frequency_penalty=0,
     presence_penalty=0.6,
-    stop=[(usermanager.GetUser(str(userID)).Name)+ ': ', "DaiigrAI: "]
+    stop=[user_searcher.getUserByIDWithBinarySearch(user_array,userID).get_name() + ': ', "DaiigrAI: "]
     )
     print(response)
     for choices in response['choices']:
@@ -77,8 +56,9 @@ async def on_message(message):
     if message.author == client.user:
         return
     #formating the message into the GPT input
-    user = usermanager.GetUser(str(message.author.id))
-    userNameInput = user.Name + '('+user.Pronouns+')'
+    print(message.author.id)
+    user = user_searcher.getUserByIDWithBinarySearch(user_array,message.author.id)
+    userNameInput = user.get_name() + '('+user.Pronouns+')'
     prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
     prompt_arr.append(prompt)
 
@@ -86,9 +66,7 @@ async def on_message(message):
         prompt_arr.pop(0)
     input = ' '.join(prompt_arr)
 
-    messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input,message.author.id)
+    messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
     await message.channel.send(messageOutput)
 
 client.run(DISCORD_TOKEN)
-
- 

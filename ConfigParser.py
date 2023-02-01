@@ -1,4 +1,5 @@
 import configparser
+import json
 
 config = configparser.ConfigParser()
 import os
@@ -11,12 +12,12 @@ def  create_config():
     config['APICONFIG'] = {'DEFAULT_PERSONALITY_TYPE':'<personality description>' ,
     'MODEL_TYPE':'<model type>',
     'MAX_TOKENS': '<max number of tokens>'}
-
     
+    config['USERMANAGER'] = {'USERARRAY': '[enter user mappings]',}
 
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
-        
+
     exit()
 
 # if example.ini does not exist in working directory run create_config() 
@@ -44,7 +45,7 @@ def get_discord_api_key():
     else:
         config.read('config.ini')
         config.sections()
-        return config['API-KEYS']['openai_api_key']
+        return config['API-KEYS']['discord_api_key']
 
 def get_default_personality_type():
     if not os.path.exists("config.ini"):
@@ -71,7 +72,17 @@ def get_max_tokens():
     else:
         config.read('config.ini')
         config.sections()
-        return config['APICONFIG']['MAX_TOKENS']
+        return int(config['APICONFIG']['MAX_TOKENS'])
     
 
 
+def get_user_mappings():
+    if not os.path.exists("config.ini"):
+        create_config()
+        return 
+    else:
+        config.read('config.ini')
+        config.sections()
+
+        print(config['USERMANAGER']['USERARRAY'])
+        return  config['USERMANAGER']['USERARRAY']
