@@ -10,7 +10,12 @@ class UserObjectArrayGenerator:
     def convertFormatedArraytoUserArray(self, FormatedStringArray):
         user_arr = []
         """
-        
+        This function converts a formated string array to a user array
+        ...
+        Attributes
+        ----------
+        FormatedStringArray : array
+            an array of formated string arrays
         """
 
         FormatedStringArray = json.loads(FormatedStringArray)

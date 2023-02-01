@@ -6,22 +6,55 @@ class UserSearcher:
     """
     # this function sorts a array of users by their name
     def sortUsersByName(self, user_array):
+        """
+        this function sorts a array of users by their name
+        ...
+        Attributes
+        ----------
+        user_array : array
+            an array of user objects
+        
+        
+        """
         user_array.sort(key=lambda x: x.Name)
         return user_array
     
     # this function sorts a array of users by their ID
     def sortUsersByID(self, user_array):
+        """
+        this function sorts a array of users by their ID
+        ...
+        Attributes
+        ----------
+        user_array : array
+            an array of user objects
+        """
         user_array.sort(key=lambda x: x.UserID)
         return user_array
     
     # this function sorts a array of users by their pronouns
     def sortUsersByPronouns(self, user_array):
+        """
+        this function sorts a array of users by their pronouns
+        ...
+        Attributes
+        ----------
+        user_array : array
+            an array of user objects
+        """
         user_array.sort(key=lambda x: x.Pronouns)
         return user_array
     
     def getUserByIDWithBinarySearch(self, user_array, UserID):
         """
         this function returns a user object from a array of users based on the user ID using a binary search
+        ...
+        Attributes
+        ----------
+        user_array : array
+            an array of user objects
+        UserID : int
+            the ID of the user to search for
         """
         user_array = self.sortUsersByID(user_array)
         low = 0
