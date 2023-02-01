@@ -4,24 +4,22 @@ import openai
 import json
 import discord
 import os
-from dotenv import load_dotenv
-#load in the token keys from the .env file
-load_dotenv()
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
-openai.api_key = OPENAI_TOKEN
-#load in AI parameters
-DEFAULT_PERSONALITY_TYPE = os.getenv("DEFAULT_PERSONALITY_TYPE")
-MODEL_TYPE = os.getenv("MODEL_TYPE")
-MAX_TOKENS = int(os.getenv("MAX_TOKENS"))
 
+import ConfigParser as configparser
+dDISCORD_TOKEN = configparser.get_discord_api_key()
+OPENAI_TOKEN = configparser.get_openai_api_key()
+openai.api_key = OPENAI_TOKEN
+
+#load in AI parameters
+DEFAULT_PERSONALITY_TYPE = configparser.get_default_personality_type()
+MODEL_TYPE = configparser.get_model_type()
+MAX_TOKENS = configparser.get_max_tokens()
 
 client = discord.Client()
 
 user_arr = []
 class User:
     global Name
-
     def __init__(self,UserID,Name,Pronouns,ADMIN_PRIV):
         self.UserID = UserID
         self.Name = Name

@@ -12,8 +12,12 @@ def  create_config():
     'MODEL_TYPE':'<model type>',
     'MAX_TOKENS': '<max number of tokens>'}
 
+    
+
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
+        
+    exit()
 
 # if example.ini does not exist in working directory run create_config() 
 if not os.path.exists("config.ini"):
