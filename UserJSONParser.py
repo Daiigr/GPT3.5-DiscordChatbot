@@ -106,3 +106,12 @@ class UserJsonParser:
                         if user.Pronouns == user_pronouns:
                                 return user
                 return None
+
+        def isUserInUserlist(self, user):
+                """
+                this method returns a boolean if a user is in a json file
+                """
+                self.GetUserListFromJson()
+                if user in self.user_list:
+                        return True
+                return False

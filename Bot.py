@@ -93,21 +93,33 @@ async def ping(interaction : discord.Interaction):
     embed = UserManagementEmbeds.createListUsersEmbed(user_json_parser.GetUserListFromJson())
     await interaction.response.send_message(embed=embed)
 
+
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
     #formating the message into the GPT input
-    user = user_json_parser.getUserBy(message.author.id)
-    userNameInput = user.get_name() + '('+user.Pronouns+')'
-    prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
-    prompt_arr.append(prompt)
+    # if user is not in the whitelist then don't respond
+    if  user_json_parser.isUserInUserlist(message.author.id):
+        return
+    else:
+        user = user_json_parser.getUserByID(message.author.id)
+        try:
+            userNameInput = user.Name + '('+user.Pronouns+')'
+            prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
+            userNameInput = message.author.name
+        
+            prompt_arr.append(prompt)
 
-    if len(prompt_arr) > 3:
-        prompt_arr.pop(0)
-    input = ' '.join(prompt_arr)
+            if len(prompt_arr) > 3:
+                prompt_arr.pop(0)
+            input = ' '.join(prompt_arr)
 
-    messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
-    await message.channel.send(messageOutput)
+            messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
+            await message.channel.send(messageOutput)
+        except:
+            print(prfx + ' Error: ' + Fore.RED + 'User not in whitelist')
+        
 
 bot.run(DISCORD_TOKEN)
