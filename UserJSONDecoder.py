@@ -7,7 +7,3 @@ class UserDecoder(json.JSONDecoder):
 
     def object_hook(self, dct):
         return User(dct['UserID'], dct['Name'], dct['Pronouns'], dct['ADMIN_PRIV'])
-
-user_json = '{"UserID": 123, "Name": "John Doe", "Pronouns": "he/him", "ADMIN_PRIV": "ADMIN"}'
-user = json.loads(user_json, cls=UserDecoder)
-print(user.__dict__)

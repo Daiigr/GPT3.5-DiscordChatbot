@@ -26,3 +26,4 @@ class UserObjectArrayGenerator:
             FormatedStringUser[2],
             FormatedStringUser[3]))
         return user_arr
+        

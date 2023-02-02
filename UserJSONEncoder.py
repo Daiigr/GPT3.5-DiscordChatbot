@@ -11,8 +11,3 @@ class UserEncoder(json.JSONEncoder):
                 'ADMIN_PRIV': obj.ADMIN_PRIV
             }
         return super().default(obj)
-
-user = User(123, "John Doe", "he/him", "ADMIN")
-user_json = json.dumps(user, cls=UserEncoder)
-
-print(user_json)
