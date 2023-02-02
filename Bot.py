@@ -39,22 +39,8 @@ print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
 
 from UserJSONParser import UserJsonParser
 user_json_parser = UserJsonParser()
-user_json_parser.AddUser(User(1233,"Daniel","he/him","ADMIN"))
-
-user_json_parser.AddUser(User(69420,"Christian","he/him","ADMIN"))
-
-user_json_parser.RemoveUserByID(1233)
-
 
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
-
-from User_Object_Array_Generator import UserObjectArrayGenerator
-FormattedStringUsers = configparser.get_user_mappings()
-user_array_generator = UserObjectArrayGenerator()
-user_array = user_array_generator.convertFormatedArraytoUserArray(FormattedStringUsers)
-
-from User_Searcher import UserSearcher
-user_searcher = UserSearcher()
 
 
 prompt_arr = []
@@ -68,9 +54,9 @@ def getResponce(prompt, userID):
     top_p=1,
     frequency_penalty=0,
     presence_penalty=0.6,
-    stop=[user_searcher.getUserByIDWithBinarySearch(user_array,userID).get_name() + ': ', "DaiigrAI: "]
+    stop=[user_json_parser.getUserByID(userID).get_name() + ': ', "DaiigrAI: "]
     )
-    print(response)
+    print(prfx + ' Response: ' + Fore.YELLOW + response['choices'][0]['text'])
     for choices in response['choices']:
         output = str(choices['text'])
         prompt_arr.append(output)
@@ -89,23 +75,30 @@ async def on_ready():
 
 #slash commands
 
+from Embeds import UserManagementEmbeds
+
 @bot.tree.command(name="adduser", description='Add a user to the bot whitelist')
 async def ping(interaction : discord.Interaction, mentioned_user : discord.User, name : str  , pronouns : str ,  admin_priv : bool):
     user_json_parser.AddUser(User(mentioned_user.id,name,pronouns,admin_priv))
-    await interaction.response.send_message( str(mentioned_user.id) +str(name) + str(pronouns) + str(admin_priv))
+    embed = UserManagementEmbeds.createAddedUserEmbed(mentioned_user,name,pronouns,admin_priv)
+    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="removeuser", description='remove a user to the bot whitelist')
 async def ping(interaction : discord.Interaction, mentioned_user : discord.User):
     user_json_parser.RemoveUserByID(mentioned_user.id)
     await interaction.response.send_message( str(mentioned_user.id))
 
+@bot.tree.command(name="listusers", description='list all users in the bot whitelist')
+async def ping(interaction : discord.Interaction):
+    embed = UserManagementEmbeds.createListUsersEmbed(user_json_parser.GetUserListFromJson())
+    await interaction.response.send_message(embed=embed)
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
         return
     #formating the message into the GPT input
-    print(message.author.id)
-    user = user_searcher.getUserByIDWithBinarySearch(user_array,message.author.id)
+    user = user_json_parser.getUserBy(message.author.id)
     userNameInput = user.get_name() + '('+user.Pronouns+')'
     prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
     prompt_arr.append(prompt)

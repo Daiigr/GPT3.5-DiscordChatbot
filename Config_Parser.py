@@ -16,8 +16,6 @@ def  create_config():
     config['APICONFIG'] = {'DEFAULT_PERSONALITY_TYPE':'<personality description>' ,
     'MODEL_TYPE':'<model type>',
     'MAX_TOKENS': '<max number of tokens>'}
-    
-    config['USERMANAGER'] = {'USERARRAY': '[enter user mappings]',}
 
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
@@ -85,17 +83,3 @@ def get_max_tokens():
         config.read('config.ini')
         config.sections()
         return int(config['APICONFIG']['MAX_TOKENS'])
-    
-
-
-def get_user_mappings():
-    """
-    This function returns the user mappings from the config.ini file
-    """
-    if not os.path.exists("config.ini"):
-        create_config()
-        return 
-    else:
-        config.read('config.ini')
-        config.sections()
-        return  config['USERMANAGER']['USERARRAY']
