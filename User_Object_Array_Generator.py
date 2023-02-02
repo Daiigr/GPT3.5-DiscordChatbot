@@ -20,7 +20,6 @@ class UserObjectArrayGenerator:
 
         FormatedStringArray = json.loads(FormatedStringArray)
         for FormatedStringUser in FormatedStringArray:
-            print(FormatedStringUser)
             user_arr.append(User(
             FormatedStringUser[0],
             FormatedStringUser[1],

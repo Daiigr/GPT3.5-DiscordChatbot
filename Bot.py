@@ -11,8 +11,8 @@ from discord.ext import commands
 from discord import app_commands
 
 import ConfigParser as configparser
+
 DISCORD_TOKEN = configparser.get_discord_api_key()
-print(DISCORD_TOKEN)
 OPENAI_TOKEN = configparser.get_openai_api_key()
 openai.api_key = OPENAI_TOKEN
 
@@ -21,6 +21,14 @@ DEFAULT_PERSONALITY_TYPE = configparser.get_default_personality_type()
 MODEL_TYPE = configparser.get_model_type()
 MAX_TOKENS = configparser.get_max_tokens()
 
+prfx = (Back.BLACK + Fore.GREEN  + time.strftime("%H:%M:%S") + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+print(Fore.WHITE + Style.BRIGHT + '---API Parameters---' + Back.RESET + Style.RESET_ALL)
+print(prfx + ' OpenAI Token: ' + Fore.BLUE + OPENAI_TOKEN)
+print(prfx + ' Discord Token: ' + Fore.BLUE + DISCORD_TOKEN)
+print( Fore.WHITE + Style.BRIGHT + '---AI Parameters---' + Back.RESET + Style.RESET_ALL)
+print(prfx + ' Defualt Personality Type: ' + Fore.YELLOW + DEFAULT_PERSONALITY_TYPE)
+print(prfx + ' Model Type: ' + Fore.YELLOW + MODEL_TYPE)
+print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
 
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 
@@ -55,10 +63,10 @@ def getResponce(prompt, userID):
 @bot.event
 async def on_ready():
     prfx = (Back.BLACK + Fore.GREEN  + time.strftime("%H:%M:%S") + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    print(Fore.WHITE + Style.BRIGHT +'---Discord Parameters---'+ Back.RESET + Style.NORMAL)
     print(prfx +' Logged in as: ' +  Fore.YELLOW + bot.user.name)
     print(prfx + ' Bot ID: ' + Fore.YELLOW + str(bot.user.id))
     print(prfx + ' Discord Version: ' + Fore.YELLOW + discord.__version__)
-    print(prfx + ' OpenAI Version: ' + Fore.YELLOW + str(openai.api_version))
     print(prfx + ' Python Version: ' + Fore.YELLOW + str(sys.version_info[0]) + '.' + str(sys.version_info[1]) + '.' + str(sys.version_info[2]))
     synced = await bot.tree.sync()
     print(prfx + ' Slash CMDs Synced: ' + Fore.YELLOW + str(len(synced)))

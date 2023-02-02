@@ -1,3 +1,2 @@
 Discord.py
 openai
-python-dotenv

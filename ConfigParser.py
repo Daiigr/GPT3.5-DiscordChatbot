@@ -98,6 +98,4 @@ def get_user_mappings():
     else:
         config.read('config.ini')
         config.sections()
-
-        print(config['USERMANAGER']['USERARRAY'])
         return  config['USERMANAGER']['USERARRAY']
