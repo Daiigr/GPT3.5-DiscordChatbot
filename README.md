@@ -54,37 +54,29 @@ once you are in your newly created Python Environment we can now install the nec
 note: python-dotenv is a library that allows us to load in a env file into our python program which is where we will store all our api keys later on
 
 now we are ready to start coding!
-## 4. setting up `Bot.py` , `.env` and 'UserMapping.csv'
+## 4. setting up  `config.ini` 
 
 copy this GitHub repository to where you want to store your files
 
-in the same folder as the Bot.py file create a new file called .env which is where the python script will pull the API keys and program parameters from in this new .env file copy these lines
+run bot.py and it will create a file called config.ini in that config.ini file you will need to add your OpenAI API key and your Discord API key along with some other configuration settings
+here is a semi filled out example of what your config.ini file should look like
 
 ```sh
-DISCORD_TOKEN=’’
+[API-KEYS]
+openai_api_key = token here
+discord_api_key = token here
 
-OPENAI_TOKEN=’’
-
-#AI parameters
-
-DEFAULT_PERSONALITY_TYPE=’the following is conversation with a AI. the AI is childish, fun and friendly’
-
-MODEL_TYPE=’text-davinci-002'
+[APICONFIG]
+default_personality_type = this is a converation between a bot and users:
+model_type = text-davinci-003
+max_tokens = 400
 
 MAX_TOKENS=’50'
 ```
 
-copy your discord token (API key) and your openAI token (API key) into the file and save it
+## 5. running the bot and adding users 
 
-additionally create a file called UserMappings.csv and save it into the same folder. That file is where you write all the authorized users that the bot will respond to
+once you have your config.ini file filled out with your API keys and your configuration settings you can now run the bot.py file and it should start up your bot and connect to your discord server
 
-the format goes as follows
-
-`DISCORD_USER_ID, NAME,PRONOUNS,ADMIN/USER`
-
-discord user id is found by activating developer mode in discord settings and right clicking on users and copying their Ids
-
-in your python environment you have open (if not open your terminal and use the conda activate GPT_BOT command) head over to the folder where the Bot.py file and the .env file is located and run the command `python3 Bot.py`
-
-if everything is properly set up then the bot should be online and you can begin to talk to it!
+to add users to the bot's whitelist you can use the slash command `/adduser` and it will add the user to the whitelist, input the desired name for that user and it will add them to the whitelist and you can now talk to the bot
 
