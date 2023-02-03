@@ -93,7 +93,26 @@ async def ping(interaction : discord.Interaction):
     embed = UserManagementEmbeds.createListUsersEmbed(user_json_parser.GetUserListFromJson())
     await interaction.response.send_message(embed=embed)
 
+@bot.tree.command(name="setRespondingChannel", description='set the channel the bot will respond in')
+async def ping(interaction : discord.Interaction, mentioned_channel : discord.TextChannel):
+    await interaction.response.send_message( str(mentioned_channel.id))
 
+@bot.tree.command(name='setPersonalityType', description='set the personality type of the bot')
+async def ping(interaction : discord.Interaction, personality_type : str):
+    await interaction.response.send_message( str(personality_type))
+
+@bot.tree.command(name='setModelType', description='set the model type of the bot')
+async def ping(interaction : discord.Interaction, model_type : str):
+    await interaction.response.send_message( str(model_type))
+
+@bot.tree.command(name='setMaxTokens', description='set the max tokens of the bot')
+async def ping(interaction : discord.Interaction, max_tokens : int):
+    await interaction.response.send_message( str(max_tokens))
+
+@bot.tree.command(name='Shutdown', description='Shutdown the bot')
+async def ping(interaction : discord.Interaction):
+    await interaction.response.send_message( 'Shutting Down')
+    await bot.close()
 
 @bot.event
 async def on_message(message):
