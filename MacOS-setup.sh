@@ -3,3 +3,4 @@ brew install --cask anaconda
 conda create --name openAIenv
 conda activate openAIenv
 pip3 install requirements.txt
+python3 Bot.py
