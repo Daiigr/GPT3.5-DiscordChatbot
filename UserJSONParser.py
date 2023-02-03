@@ -115,3 +115,13 @@ class UserJsonParser:
                 if user in self.user_list:
                         return True
                 return False
+
+        def isUserInUserlistByID(self, user_id):
+                """
+                this method returns a boolean if a user is in a json file
+                """
+                self.GetUserListFromJson()
+                for user in self.user_list:
+                        if user.UserID == user_id:
+                                return True
+                return False

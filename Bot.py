@@ -43,6 +43,18 @@ print(prfx + ' Model Type: ' + Fore.YELLOW + MODEL_TYPE)
 MAX_TOKENS = configparser.get_max_tokens()
 print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
 
+TEMPERATURE = configparser.get_temperature()
+print(prfx + ' Temperature: ' + Fore.YELLOW + str(TEMPERATURE))
+
+TOP_P = configparser.get_top_p()
+print(prfx + ' Top P: ' + Fore.YELLOW + str(TOP_P))
+
+FREQUENCY_PENALTY = configparser.get_frequency_penalty()
+print(prfx + ' Frequency Penalty: ' + Fore.YELLOW + str(FREQUENCY_PENALTY))
+
+PRESENCE_PENALTY = configparser.get_presence_penalty()
+print(prfx + ' Presence Penalty: ' + Fore.YELLOW + str(PRESENCE_PENALTY))
+
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 
 
@@ -50,25 +62,6 @@ bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 from UserJSONParser import UserJsonParser
 user_json_parser = UserJsonParser()
 allow_non_whitelisted_users = True
-
-prompt_arr = []
-    
-def getResponce(prompt, userID):
-    response = openai.Completion.create(
-    model=MODEL_TYPE,
-    prompt=prompt,
-    temperature=0.90,
-    max_tokens=MAX_TOKENS,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0.6,
-    stop=[user_json_parser.getUserByID(userID).get_name() + ': ', "DaiigrAI: "]
-    )
-    print(prfx + ' Response: ' + Fore.YELLOW + response['choices'][0]['text'])
-    for choices in response['choices']:
-        output = str(choices['text'])
-        prompt_arr.append(output)
-    return output
 
 @bot.event
 async def on_ready():
@@ -109,11 +102,6 @@ async def setRespondingChannel(interaction : discord.Interaction, mentioned_chan
 async def setRespondingRole(interaction : discord.Interaction, mentioned_role : discord.Role):
     await interaction.response.send_message( str(mentioned_role.id))
 
-@bot.tree.command(name="allow-non-whitelisted-users", description='set if the bot will respond to non whitelisted users')
-async def allowNonWhitelistedUsers(interaction : discord.Interaction, allow : bool):
-    allow_non_whitelisted_users = allow
-    await interaction.response.send_message( str(allow))
-
 @bot.tree.command(name="allow-nsfw-content-generation", description='set if the bot will respond to non whitelisted users')
 async def allowNonWhitelistedUsers(interaction : discord.Interaction, allow : bool):
     await interaction.response.send_message( str(allow))
@@ -151,53 +139,59 @@ async def listConfiguration(interaction : discord.Interaction):
     await interaction.response.send_message( str(allow_non_whitelisted_users))
 
 @bot.tree.command(name='shutdown', description='Shutdown the bot')
+async def shutdown(interaction : discord.Interaction):
+    await interaction.response.send_message( 'Shutting Down')
+    await bot.close()
+
+@shutdown.command(name='shutdown', description='Shutdown the bot')
 async def ping(interaction : discord.Interaction):
     await interaction.response.send_message( 'Shutting Down')
     await bot.close()
 
+prompt_arr = []
+    
+def getResponce(prompt, user):
+    response = openai.Completion.create(
+    model=MODEL_TYPE,
+    prompt=prompt,
+    temperature=0.90,
+    max_tokens=MAX_TOKENS,
+    top_p=1,
+    frequency_penalty=0,
+    presence_penalty=0.6,
+    stop=[user.Name + ': ', "DaiigrAI: "]
+    )
+    print(prfx + ' Response: ' + Fore.YELLOW + response['choices'][0]['text'])
+    for choices in response['choices']:
+        output = str(choices['text'])
+        prompt_arr.append(output)
+    return output
+
+#bot events
+
 @bot.event
-
-async def isUserAllowedToBeRespondedTo(user):
-        if allow_non_whitelisted_users == True:
-            return True
-        else:
-            if user_json_parser.isUserInUserlist(user.id):
-                return True
-            else:
-                return False
-
 async def on_message(message):
     if message.author == bot.user:
         return
-    
-    #check if the message is in the responding channel and if not then return
-    # if responding_channel == '': allow any channel
-
-
-    if responding_channel == '':    
-        responding_channel = message.channel.id
-    elif message.channel.id != responding_channel:
-        return
-    
-    #formating the message into the GPT input
-    # if user is not in the whitelist then don't respond
-    if isUserAllowedToBeRespondedTo(message.author.id) == False:
-        return
-    user = user_json_parser.getUserByID(message.author.id)
-    if user == None:
-        user = User(message.author.id,message.author.name,'They/Them',False)
-        userNameInput = user.Name + '('+user.Pronouns+')'
-        prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
-        userNameInput = message.author.name
         
-        prompt_arr.append(prompt)
+    user = user_json_parser.getUserByID(message.author.id)
 
-        if len(prompt_arr) > 3:
-            prompt_arr.pop(0)
-        input = ' '.join(prompt_arr)
+    if user == None:
+        user = User(message.author.id,message.author.name,'he/him','NOTADMIN')
+    
 
-        messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
-        await message.channel.send(messageOutput)
+    userNameInput = user.Name + '('+user.Pronouns+')'
+    prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
+    userNameInput = message.author.name
+            
+    prompt_arr.append(prompt)
+
+    if len(prompt_arr) > 3:
+        prompt_arr.pop(0)
+    input = ' '.join(prompt_arr)
+
+    messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , user)
+    await message.channel.send(messageOutput)
             
         
 try:

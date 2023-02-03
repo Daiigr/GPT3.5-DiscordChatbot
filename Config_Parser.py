@@ -111,7 +111,7 @@ class botConfigParser:
         This function returns the Bot Max Tokens
         """
         config.read('config.ini')
-        return config['APICONFIG']['MAX_TOKENS']
+        return int(config['APICONFIG']['MAX_TOKENS'])
 
     def get_temperature(self):
         """
@@ -148,7 +148,7 @@ class botConfigParser:
         """
         prfx = (Back.BLACK + Fore.GREEN  + time.strftime("%H:%M:%S") + Back.RESET + Fore.WHITE  + Style.BRIGHT)
         if os.path.isfile('config.ini'):
-            print(Fore.RED + Style.NORMAL + 'Config.ini Exists' + Back.RESET + Style.RESET_ALL)
+            print(Fore.GREEN + Style.NORMAL + 'Config.ini Exists' + Back.RESET + Style.RESET_ALL)
         else:
             print(Fore.RED + Style.NORMAL + 'Config.ini does not exist ...' + Back.RESET + Style.RESET_ALL)
             self.createConfig()
