@@ -39,6 +39,7 @@ print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
 
 from UserJSONParser import UserJsonParser
 user_json_parser = UserJsonParser()
+allow_non_whitelisted_users = True
 
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 
@@ -77,68 +78,120 @@ async def on_ready():
 
 from Embeds import UserManagementEmbeds
 
-@bot.tree.command(name="adduser", description='Add a user to the bot whitelist')
-async def ping(interaction : discord.Interaction, mentioned_user : discord.User, name : str  , pronouns : str ,  admin_priv : bool):
+@bot.tree.command(name="add-user", description='Add a user to the bot whitelist')
+async def addUser(interaction : discord.Interaction, mentioned_user : discord.User, name : str  , pronouns : str ,  admin_priv : bool):
     user_json_parser.AddUser(User(mentioned_user.id,name,pronouns,admin_priv))
     embed = UserManagementEmbeds.createAddedUserEmbed(mentioned_user,name,pronouns,admin_priv)
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="removeuser", description='remove a user to the bot whitelist')
-async def ping(interaction : discord.Interaction, mentioned_user : discord.User):
+@bot.tree.command(name="remove-user", description='remove a user to the bot whitelist')
+async def removeUser(interaction : discord.Interaction, mentioned_user : discord.User):
     user_json_parser.RemoveUserByID(mentioned_user.id)
     await interaction.response.send_message( str(mentioned_user.id))
 
-@bot.tree.command(name="listusers", description='list all users in the bot whitelist')
-async def ping(interaction : discord.Interaction):
+@bot.tree.command(name="list-users", description='list all users in the bot whitelist')
+async def listUsers(interaction : discord.Interaction):
     embed = UserManagementEmbeds.createListUsersEmbed(user_json_parser.GetUserListFromJson())
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="setRespondingChannel", description='set the channel the bot will respond in')
-async def ping(interaction : discord.Interaction, mentioned_channel : discord.TextChannel):
+@bot.tree.command(name="set-responding-channel", description='set the channel the bot will respond in')
+async def setRespondingChannel(interaction : discord.Interaction, mentioned_channel : discord.TextChannel):
     await interaction.response.send_message( str(mentioned_channel.id))
 
-@bot.tree.command(name='setPersonalityType', description='set the personality type of the bot')
-async def ping(interaction : discord.Interaction, personality_type : str):
+@bot.tree.command(name="set-responding-role", description='set the role the bot will respond to')
+async def setRespondingRole(interaction : discord.Interaction, mentioned_role : discord.Role):
+    await interaction.response.send_message( str(mentioned_role.id))
+
+@bot.tree.command(name="allow-non-whitelisted-users", description='set if the bot will respond to non whitelisted users')
+async def allowNonWhitelistedUsers(interaction : discord.Interaction, allow : bool):
+    allow_non_whitelisted_users = allow
+    await interaction.response.send_message( str(allow))
+
+@bot.tree.command(name="allow-nsfw-content-generation", description='set if the bot will respond to non whitelisted users')
+async def allowNonWhitelistedUsers(interaction : discord.Interaction, allow : bool):
+    await interaction.response.send_message( str(allow))
+
+@bot.tree.command(name='set-personality-type', description='set the personality type of the bot')
+async def setPersonalityType(interaction : discord.Interaction, personality_type : str):
     await interaction.response.send_message( str(personality_type))
 
-@bot.tree.command(name='setModelType', description='set the model type of the bot')
-async def ping(interaction : discord.Interaction, model_type : str):
+@bot.tree.command(name='set-model-type', description='set the model type of the bot')
+async def setModelType(interaction : discord.Interaction, model_type : str):
     await interaction.response.send_message( str(model_type))
 
-@bot.tree.command(name='setMaxTokens', description='set the max tokens of the bot')
-async def ping(interaction : discord.Interaction, max_tokens : int):
+@bot.tree.command(name='set-max-tokens', description='set the max tokens of the bot')
+async def setMaxTokens(interaction : discord.Interaction, max_tokens : int):
     await interaction.response.send_message( str(max_tokens))
 
-@bot.tree.command(name='Shutdown', description='Shutdown the bot')
+@bot.tree.command(name='set-temperature', description='set the temperature of the bot')
+async def setTemperature(interaction : discord.Interaction, temperature : float):
+    await interaction.response.send_message( str(temperature))
+
+@bot.tree.command(name='set-top-p', description='set the top p of the bot')
+async def setTopP(interaction : discord.Interaction, top_p : float):
+    await interaction.response.send_message( str(top_p))
+
+@bot.tree.command(name='set-frequency-penalty', description='set the frequency penalty of the bot')
+async def setFrequencyPenalty(interaction : discord.Interaction, frequency_penalty : float):
+    await interaction.response.send_message( str(frequency_penalty))
+
+@bot.tree.command(name='set-memory-length', description='set the memory length of the bot')
+async def setMemoryLength(interaction : discord.Interaction, memory_length : int):
+    await interaction.response.send_message( str(memory_length))
+
+@bot.tree.command(name='list-configuration', description='list all settings of the bot')
+async def listConfiguration(interaction : discord.Interaction):
+    await interaction.response.send_message( str(allow_non_whitelisted_users))
+
+@bot.tree.command(name='shutdown', description='Shutdown the bot')
 async def ping(interaction : discord.Interaction):
     await interaction.response.send_message( 'Shutting Down')
     await bot.close()
 
 @bot.event
+
+async def isUserAllowedToBeRespondedTo(user):
+        if allow_non_whitelisted_users == True:
+            return True
+        else:
+            if user_json_parser.isUserInUserlist(user.id):
+                return True
+            else:
+                return False
+
 async def on_message(message):
     if message.author == bot.user:
         return
+    
+    #check if the message is in the responding channel and if not then return
+    # if responding_channel == '': allow any channel
+
+
+    if responding_channel == '':    
+        responding_channel = message.channel.id
+    elif message.channel.id != responding_channel:
+        return
+    
     #formating the message into the GPT input
     # if user is not in the whitelist then don't respond
-    if  user_json_parser.isUserInUserlist(message.author.id):
+    if isUserAllowedToBeRespondedTo(message.author.id) == False:
         return
-    else:
-        user = user_json_parser.getUserByID(message.author.id)
-        try:
-            userNameInput = user.Name + '('+user.Pronouns+')'
-            prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
-            userNameInput = message.author.name
+    user = user_json_parser.getUserByID(message.author.id)
+    if user == None:
+        user = User(message.author.id,message.author.name,'They/Them',False)
+        userNameInput = user.Name + '('+user.Pronouns+')'
+        prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
+        userNameInput = message.author.name
         
-            prompt_arr.append(prompt)
+        prompt_arr.append(prompt)
 
-            if len(prompt_arr) > 3:
-                prompt_arr.pop(0)
-            input = ' '.join(prompt_arr)
+        if len(prompt_arr) > 3:
+            prompt_arr.pop(0)
+        input = ' '.join(prompt_arr)
 
-            messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
-            await message.channel.send(messageOutput)
-        except:
-            print(prfx + ' Error: ' + Fore.RED + 'User not in whitelist')
+        messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , message.author.id)
+        await message.channel.send(messageOutput)
+            
         
 
 bot.run(DISCORD_TOKEN)
