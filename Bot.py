@@ -10,8 +10,12 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-import Config_Parser as configparser
+from Config_Parser import botConfigParser
 from User import User
+
+# creates a config parser object which is used to parse the config.ini file
+#checks if config.ini exists, if not it creates one and opens the config.ini creator
+configparser = botConfigParser()
 
 prfx = (Back.BLACK + Fore.GREEN  + time.strftime("%H:%M:%S") + Back.RESET + Fore.WHITE  + Style.BRIGHT)
 
@@ -22,7 +26,10 @@ print(prfx + ' Discord Token: ' + Fore.BLUE + DISCORD_TOKEN)
 OPENAI_TOKEN = configparser.get_openai_api_key()
 print(prfx + ' Discord Token: ' + Fore.BLUE + DISCORD_TOKEN)
 
-openai.api_key = OPENAI_TOKEN
+try:
+    openai.api_key = OPENAI_TOKEN
+except:
+    print(Fore.RED + Style.NORMAL + 'Invalid OpenAI API Key' + Back.RESET + Style.RESET_ALL)
 
 #load in AI parameters
 print( Fore.WHITE + Style.BRIGHT + '---AI Parameters---' + Back.RESET + Style.RESET_ALL)
@@ -36,13 +43,13 @@ print(prfx + ' Model Type: ' + Fore.YELLOW + MODEL_TYPE)
 MAX_TOKENS = configparser.get_max_tokens()
 print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
 
+bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
+
+
 
 from UserJSONParser import UserJsonParser
 user_json_parser = UserJsonParser()
 allow_non_whitelisted_users = True
-
-bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
-
 
 prompt_arr = []
     
@@ -193,5 +200,7 @@ async def on_message(message):
         await message.channel.send(messageOutput)
             
         
-
-bot.run(DISCORD_TOKEN)
+try:
+    bot.run(DISCORD_TOKEN)
+except:
+    print(prfx + Fore.RED + ' please enter a valid Discord token' + Fore.RESET + Style.RESET_ALL) 
