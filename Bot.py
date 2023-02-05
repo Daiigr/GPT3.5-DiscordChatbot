@@ -55,6 +55,10 @@ print(prfx + ' Frequency Penalty: ' + Fore.YELLOW + str(FREQUENCY_PENALTY))
 PRESENCE_PENALTY = configparser.get_presence_penalty()
 print(prfx + ' Presence Penalty: ' + Fore.YELLOW + str(PRESENCE_PENALTY))
 
+memory_length = ''
+responding_role = ''
+responding_channel = ''
+
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 
 
@@ -132,21 +136,19 @@ async def setFrequencyPenalty(interaction : discord.Interaction, frequency_penal
 
 @bot.tree.command(name='set-memory-length', description='set the memory length of the bot')
 async def setMemoryLength(interaction : discord.Interaction, memory_length : int):
+    memory_length = memory_length
     await interaction.response.send_message( str(memory_length))
 
 @bot.tree.command(name='list-configuration', description='list all settings of the bot')
 async def listConfiguration(interaction : discord.Interaction):
-    await interaction.response.send_message( str(allow_non_whitelisted_users))
+    embed = UserManagementEmbeds.listConfiguration(DEFAULT_PERSONALITY_TYPE,MODEL_TYPE,MAX_TOKENS,TEMPERATURE,TOP_P,FREQUENCY_PENALTY,memory_length,responding_role, responding_channel)
+    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name='shutdown', description='Shutdown the bot')
 async def shutdown(interaction : discord.Interaction):
     await interaction.response.send_message( 'Shutting Down')
     await bot.close()
 
-@shutdown.command(name='shutdown', description='Shutdown the bot')
-async def ping(interaction : discord.Interaction):
-    await interaction.response.send_message( 'Shutting Down')
-    await bot.close()
 
 prompt_arr = []
     
@@ -186,7 +188,7 @@ async def on_message(message):
             
     prompt_arr.append(prompt)
 
-    if len(prompt_arr) > 3:
+    if len(prompt_arr) > memory_length:
         prompt_arr.pop(0)
     input = ' '.join(prompt_arr)
 
