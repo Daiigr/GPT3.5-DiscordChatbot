@@ -125,3 +125,12 @@ class UserJsonParser:
                         if user.UserID == user_id:
                                 return True
                 return False
+
+
+        def EditUser(self, user_id, user):
+                """
+                this method edits a user object in a json file
+                """
+                self.RemoveUserByID(user_id)
+                self.AddUser(user)
+                self.SaveUserListToJson()

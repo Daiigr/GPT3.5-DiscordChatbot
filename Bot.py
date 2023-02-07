@@ -55,7 +55,7 @@ print(prfx + ' Frequency Penalty: ' + Fore.YELLOW + str(FREQUENCY_PENALTY))
 PRESENCE_PENALTY = configparser.get_presence_penalty()
 print(prfx + ' Presence Penalty: ' + Fore.YELLOW + str(PRESENCE_PENALTY))
 
-memory_length = ''
+memory_length = 3
 responding_role = ''
 responding_channel = ''
 
@@ -82,72 +82,99 @@ async def on_ready():
 
 from Embeds import UserManagementEmbeds
 
-@bot.tree.command(name="add-user", description='Add a user to the bot whitelist')
-async def addUser(interaction : discord.Interaction, mentioned_user : discord.User, name : str  , pronouns : str ,  admin_priv : bool):
-    user_json_parser.AddUser(User(mentioned_user.id,name,pronouns,admin_priv))
-    embed = UserManagementEmbeds.createAddedUserEmbed(mentioned_user,name,pronouns,admin_priv)
+userCommandGroup = app_commands.Group(name="user" , description="manage users in the bot whitelist")
+
+@userCommandGroup.command(name="add" , description="add a user to the bot whitelist")
+async def addUser(interaction: discord.Interaction, user : discord.User, name : str  , pronouns : str) -> None:
+    user_json_parser.AddUser(User(user.id,name,pronouns,'non' ))
+    print(prfx + ' Added User: ' + Fore.PURPLE + name + ' (' + str(user.id) + ')' + ' with pronouns: ' + pronouns + ' to the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    embed = UserManagementEmbeds.createAddedUserEmbed(user,name,'they/them')
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="remove-user", description='remove a user to the bot whitelist')
-async def removeUser(interaction : discord.Interaction, mentioned_user : discord.User):
-    user_json_parser.RemoveUserByID(mentioned_user.id)
-    await interaction.response.send_message( str(mentioned_user.id))
+@userCommandGroup.command(name="remove" , description="remove a user from the bot whitelist")
+async def removeUser(interaction: discord.Interaction, user : discord.User) -> None:
+    user_json_parser.RemoveUserByID(user.id)
+    print(prfx + ' Removed User: ' + Fore.PURPLE + user.name + ' (' + str(user.id) + ')' + ' from the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    embed = UserManagementEmbeds.createRemovedUserEmbed(user)
+    await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="list-users", description='list all users in the bot whitelist')
-async def listUsers(interaction : discord.Interaction):
+@userCommandGroup.command(name="edit" , description="edit a user in the bot whitelist")
+async def editUser(interaction: discord.Interaction, user : discord.User, name : str  , pronouns : str) -> None:
+    user_json_parser.EditUser(user.id ,User(user.id,name,pronouns, 'non' ))
+    await interaction.response.send_message( str(user.id))
+
+@userCommandGroup.command(name="list" , description="list all users in the bot whitelist")
+async def listUsers(interaction: discord.Interaction) -> None:
     embed = UserManagementEmbeds.createListUsersEmbed(user_json_parser.GetUserListFromJson())
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name="set-responding-channel", description='set the channel the bot will respond in')
-async def setRespondingChannel(interaction : discord.Interaction, mentioned_channel : discord.TextChannel):
-    await interaction.response.send_message( str(mentioned_channel.id))
 
-@bot.tree.command(name="set-responding-role", description='set the role the bot will respond to')
+bot.tree.add_command(userCommandGroup)
+
+setCommandGroup = app_commands.Group(name="set" , description="manage bot settings")
+
+@setCommandGroup.command(name="role", description='set the role the bot will respond to')
 async def setRespondingRole(interaction : discord.Interaction, mentioned_role : discord.Role):
+    responding_role = mentioned_role
+    print(prfx + ' Responding Role: ' + Fore.YELLOW + mentioned_role.name + ' (' + str(mentioned_role.id) + ')' + Back.RESET + Fore.WHITE  + Style.BRIGHT   )
     await interaction.response.send_message( str(mentioned_role.id))
 
-@bot.tree.command(name="allow-nsfw-content-generation", description='set if the bot will respond to non whitelisted users')
-async def allowNonWhitelistedUsers(interaction : discord.Interaction, allow : bool):
-    await interaction.response.send_message( str(allow))
-
-@bot.tree.command(name='set-personality-type', description='set the personality type of the bot')
+@setCommandGroup.command(name="personality", description='set the personality type of the bot')
 async def setPersonalityType(interaction : discord.Interaction, personality_type : str):
+    DEFAULT_PERSONALITY_TYPE = personality_type
+    print(prfx + ' Personality Type: ' + Fore.YELLOW + personality_type + Back.RESET + Fore.WHITE  + Style.BRIGHT)
     await interaction.response.send_message( str(personality_type))
 
-@bot.tree.command(name='set-model-type', description='set the model type of the bot')
+@setCommandGroup.command(name="model-type", description='set the model type of the bot')
 async def setModelType(interaction : discord.Interaction, model_type : str):
     await interaction.response.send_message( str(model_type))
 
-@bot.tree.command(name='set-max-tokens', description='set the max tokens of the bot')
+@setCommandGroup.command(name="max-tokens", description='set the max tokens of the bot')
 async def setMaxTokens(interaction : discord.Interaction, max_tokens : int):
     await interaction.response.send_message( str(max_tokens))
 
-@bot.tree.command(name='set-temperature', description='set the temperature of the bot')
+@setCommandGroup.command(name="temperature", description='set the temperature of the bot')
 async def setTemperature(interaction : discord.Interaction, temperature : float):
     await interaction.response.send_message( str(temperature))
 
-@bot.tree.command(name='set-top-p', description='set the top p of the bot')
+@setCommandGroup.command(name="top-p", description='set the top p of the bot')
 async def setTopP(interaction : discord.Interaction, top_p : float):
     await interaction.response.send_message( str(top_p))
 
-@bot.tree.command(name='set-frequency-penalty', description='set the frequency penalty of the bot')
+@setCommandGroup.command(name="frequency-penalty", description='set the frequency penalty of the bot')
 async def setFrequencyPenalty(interaction : discord.Interaction, frequency_penalty : float):
     await interaction.response.send_message( str(frequency_penalty))
 
-@bot.tree.command(name='set-memory-length', description='set the memory length of the bot')
+@setCommandGroup.command(name="presence-penalty", description='set the presence penalty of the bot')
+async def setPresencePenalty(interaction : discord.Interaction, presence_penalty : float):
+    await interaction.response.send_message( str(presence_penalty))
+
+@setCommandGroup.command(name="memory-length", description='set the memory length of the bot')
 async def setMemoryLength(interaction : discord.Interaction, memory_length : int):
-    memory_length = memory_length
     await interaction.response.send_message( str(memory_length))
 
-@bot.tree.command(name='list-configuration', description='list all settings of the bot')
-async def listConfiguration(interaction : discord.Interaction):
-    embed = UserManagementEmbeds.listConfiguration(DEFAULT_PERSONALITY_TYPE,MODEL_TYPE,MAX_TOKENS,TEMPERATURE,TOP_P,FREQUENCY_PENALTY,memory_length,responding_role, responding_channel)
-    await interaction.response.send_message(embed=embed)
-
-@bot.tree.command(name='shutdown', description='Shutdown the bot')
-async def shutdown(interaction : discord.Interaction):
-    await interaction.response.send_message( 'Shutting Down')
+@bot.tree.command(name="stop", description='stop the bot')
+async def stopBot(interaction : discord.Interaction):
+    print(prfx + ' Stopping Bot' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    await interaction.response.send_message( 'Stopping Bot')
     await bot.close()
+
+@bot.tree.command(name="restart", description='restart the bot')
+async def restartBot(interaction : discord.Interaction):
+    await interaction.response.send_message( 'Restarting Bot')
+    print(prfx + ' Restarting Bot' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    await bot.close()
+    os.system('python3 Bot.py')
+
+    bot.tree.add_command(setCommandGroup)
+
+ListCommandGroup = app_commands.Group(name="list" , description="list bot settings")
+
+@ListCommandGroup.command(name="configuration", description='list the configuration of the bot')
+async def listConfiguration(interaction : discord.Interaction):
+    embed = UserManagementEmbeds.createListConfigurationEmbed(DEFAULT_PERSONALITY_TYPE,MODEL_TYPE,MAX_TOKENS,TEMPERATURE,TOP_P,FREQUENCY_PENALTY,PRESENCE_PENALTY)
+    await interaction.response.send_message(embed=embed)
+bot.tree.add_command(ListCommandGroup)
 
 
 prompt_arr = []
