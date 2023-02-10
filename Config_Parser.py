@@ -31,12 +31,17 @@ class botConfigParser:
 
         print (prfx + Fore.GREEN + Style.NORMAL +' Please enter your Bot Default Personality Type: ' + Fore.RESET)
         personality_type = input()
+
+        print (prfx + Fore.GREEN + Style.NORMAL +' Please enter the number of messages your bot can remember : ' + Fore.RESET)
+        memory_length = input()
+
         model_type = 'text-davinci-003'
         max_tokens = 200
         temperature = 0.90
         top_p = 1
         frequency_penalty = 0
-        presence_penalty = 0.6
+        presence_penalty = 0.
+
 
 
         config['APICONFIG'] = {
@@ -46,7 +51,8 @@ class botConfigParser:
         'TEMPERATURE': temperature,
         'TOP_P': top_p,
         'FREQUENCY_PENALTY': frequency_penalty,
-        'PRESENCE_PENALTY': presence_penalty}
+        'PRESENCE_PENALTY': presence_penalty,
+        'MEMORY_LENGTH': 3}
 
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -118,7 +124,7 @@ class botConfigParser:
         This function returns the Bot Temperature
         """
         config.read('config.ini')
-        return config['APICONFIG']['TEMPERATURE']
+        return float (config['APICONFIG']['TEMPERATURE'])
     
     def get_top_p(self):
         """
@@ -140,6 +146,13 @@ class botConfigParser:
         """
         config.read('config.ini')
         return config['APICONFIG']['PRESENCE_PENALTY']
+
+    def get_memory_length(self):
+        """
+        This function returns the Bot Memory Length
+        """
+        config.read('config.ini')
+        return int( config['APICONFIG']['MEMORY_LENGTH'])
 
 
     def __init__(self):

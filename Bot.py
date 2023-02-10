@@ -34,30 +34,33 @@ except:
 #load in AI parameters
 print( Fore.WHITE + Style.BRIGHT + '---AI Parameters---' + Back.RESET + Style.RESET_ALL)
 
-DEFAULT_PERSONALITY_TYPE = configparser.get_default_personality_type()
-print(prfx + ' Defualt Personality Type: ' + Fore.YELLOW + DEFAULT_PERSONALITY_TYPE)
+botPersonalitytype = configparser.get_default_personality_type()
+print(prfx + ' Defualt Personality Type: ' + Fore.YELLOW + botPersonalitytype)
 
-MODEL_TYPE = configparser.get_model_type()
-print(prfx + ' Model Type: ' + Fore.YELLOW + MODEL_TYPE)
+openAImodelType = configparser.get_model_type()
+print(prfx + ' Model Type: ' + Fore.YELLOW + openAImodelType)
 
-MAX_TOKENS = configparser.get_max_tokens()
-print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(MAX_TOKENS))
+maxTokens = configparser.get_max_tokens()
+print(prfx + ' Max Tokens: ' + Fore.YELLOW + str(maxTokens))
 
-TEMPERATURE = configparser.get_temperature()
-print(prfx + ' Temperature: ' + Fore.YELLOW + str(TEMPERATURE))
+temperature = configparser.get_temperature()
+print(prfx + ' Temperature: ' + Fore.YELLOW + str(temperature))
 
-TOP_P = configparser.get_top_p()
-print(prfx + ' Top P: ' + Fore.YELLOW + str(TOP_P))
+topP = configparser.get_top_p()
+print(prfx + ' Top P: ' + Fore.YELLOW + str(topP))
 
-FREQUENCY_PENALTY = configparser.get_frequency_penalty()
-print(prfx + ' Frequency Penalty: ' + Fore.YELLOW + str(FREQUENCY_PENALTY))
+frequencyPenalty = configparser.get_frequency_penalty()
+print(prfx + ' Frequency Penalty: ' + Fore.YELLOW + str(frequencyPenalty))
 
-PRESENCE_PENALTY = configparser.get_presence_penalty()
-print(prfx + ' Presence Penalty: ' + Fore.YELLOW + str(PRESENCE_PENALTY))
+presencePenalty = configparser.get_presence_penalty()
+print(prfx + ' Presence Penalty: ' + Fore.YELLOW + str(presencePenalty))
 
-memory_length = 3
-responding_role = ''
-responding_channel = ''
+memoryLength = configparser.get_memory_length()
+print(prfx + ' Memory Length: ' + Fore.YELLOW + str(memoryLength))
+
+botName = configparser.get_bot_name()
+print(prfx + ' Bot Name: ' + Fore.YELLOW + botName)
+
 
 bot = commands.Bot(command_prefix = "!", intents = discord.Intents.all())
 
@@ -87,14 +90,14 @@ userCommandGroup = app_commands.Group(name="user" , description="manage users in
 @userCommandGroup.command(name="add" , description="add a user to the bot whitelist")
 async def addUser(interaction: discord.Interaction, user : discord.User, name : str  , pronouns : str) -> None:
     user_json_parser.AddUser(User(user.id,name,pronouns,'non' ))
-    print(prfx + ' Added User: ' + Fore.PURPLE + name + ' (' + str(user.id) + ')' + ' with pronouns: ' + pronouns + ' to the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    print(prfx + ' Added User: ' + Fore.BLUE + name + ' (' + str(user.id) + ')' + ' with pronouns: ' + pronouns + ' to the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
     embed = UserManagementEmbeds.createAddedUserEmbed(user,name,'they/them')
     await interaction.response.send_message(embed=embed)
 
 @userCommandGroup.command(name="remove" , description="remove a user from the bot whitelist")
 async def removeUser(interaction: discord.Interaction, user : discord.User) -> None:
     user_json_parser.RemoveUserByID(user.id)
-    print(prfx + ' Removed User: ' + Fore.PURPLE + user.name + ' (' + str(user.id) + ')' + ' from the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    print(prfx + ' Removed User: ' + Fore.BLUE + user.name + ' (' + str(user.id) + ')' + ' from the whitelist' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
     embed = UserManagementEmbeds.createRemovedUserEmbed(user)
     await interaction.response.send_message(embed=embed)
 
@@ -119,6 +122,12 @@ async def setRespondingRole(interaction : discord.Interaction, mentioned_role : 
     print(prfx + ' Responding Role: ' + Fore.YELLOW + mentioned_role.name + ' (' + str(mentioned_role.id) + ')' + Back.RESET + Fore.WHITE  + Style.BRIGHT   )
     await interaction.response.send_message( str(mentioned_role.id))
 
+@setCommandGroup.command(name="botname", description='set the name of the bot')
+async def setBotName(interaction : discord.Interaction, bot_name : str):
+    botName = bot_name
+    print(prfx + ' Bot Name: ' + Fore.YELLOW + bot_name + Back.RESET + Fore.WHITE  + Style.BRIGHT)
+    await interaction.response.send_message( str(bot_name))
+
 @setCommandGroup.command(name="personality", description='set the personality type of the bot')
 async def setPersonalityType(interaction : discord.Interaction, personality_type : str):
     DEFAULT_PERSONALITY_TYPE = personality_type
@@ -126,8 +135,8 @@ async def setPersonalityType(interaction : discord.Interaction, personality_type
     await interaction.response.send_message( str(personality_type))
 
 @setCommandGroup.command(name="model-type", description='set the model type of the bot')
-async def setModelType(interaction : discord.Interaction, model_type : str):
-    await interaction.response.send_message( str(model_type))
+async def setModelType(interaction : discord.Interaction, modelType : str):
+    await interaction.response.send_message( str(modelType))
 
 @setCommandGroup.command(name="max-tokens", description='set the max tokens of the bot')
 async def setMaxTokens(interaction : discord.Interaction, max_tokens : int):
@@ -159,12 +168,11 @@ async def stopBot(interaction : discord.Interaction):
     await interaction.response.send_message( 'Stopping Bot')
     await bot.close()
 
-@bot.tree.command(name="restart", description='restart the bot')
-async def restartBot(interaction : discord.Interaction):
-    await interaction.response.send_message( 'Restarting Bot')
-    print(prfx + ' Restarting Bot' + Back.RESET + Fore.WHITE  + Style.BRIGHT)
-    await bot.close()
-    os.system('python3 Bot.py')
+
+
+    
+
+
 
     bot.tree.add_command(setCommandGroup)
 
@@ -172,7 +180,7 @@ ListCommandGroup = app_commands.Group(name="list" , description="list bot settin
 
 @ListCommandGroup.command(name="configuration", description='list the configuration of the bot')
 async def listConfiguration(interaction : discord.Interaction):
-    embed = UserManagementEmbeds.createListConfigurationEmbed(DEFAULT_PERSONALITY_TYPE,MODEL_TYPE,MAX_TOKENS,TEMPERATURE,TOP_P,FREQUENCY_PENALTY,PRESENCE_PENALTY)
+    embed = UserManagementEmbeds.createListConfigurationEmbed(botPersonalitytype,openAImodelType,maxTokens,temperature,topP,frequencyPenalty,presencePenalty)
     await interaction.response.send_message(embed=embed)
 bot.tree.add_command(ListCommandGroup)
 
@@ -181,14 +189,14 @@ prompt_arr = []
     
 def getResponce(prompt, user):
     response = openai.Completion.create(
-    model=MODEL_TYPE,
+    model=openAImodelType,
     prompt=prompt,
-    temperature=0.90,
-    max_tokens=MAX_TOKENS,
+    temperature=temperature,
+    max_tokens=maxTokens,
     top_p=1,
     frequency_penalty=0,
     presence_penalty=0.6,
-    stop=[user.Name + ': ', "DaiigrAI: "]
+    stop=[user.Name + ': ', botName+": "]
     )
     print(prfx + ' Response: ' + Fore.YELLOW + response['choices'][0]['text'])
     for choices in response['choices']:
@@ -210,16 +218,16 @@ async def on_message(message):
     
 
     userNameInput = user.Name + '('+user.Pronouns+')'
-    prompt = '\n'+ userNameInput + ': ' + message.content + "\nDaiigrAI: "
+    prompt = '\n'+ userNameInput + ': ' + message.content + "\n"+botName+": "
     userNameInput = message.author.name
             
     prompt_arr.append(prompt)
 
-    if len(prompt_arr) > memory_length:
+    if len(prompt_arr) > memoryLength:
         prompt_arr.pop(0)
     input = ' '.join(prompt_arr)
 
-    messageOutput = getResponce(DEFAULT_PERSONALITY_TYPE + input , user)
+    messageOutput = getResponce(botPersonalitytype + input , user)
     await message.channel.send(messageOutput)
             
         
